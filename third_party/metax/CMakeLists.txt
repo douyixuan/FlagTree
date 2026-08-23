@@ -1,5 +1,11 @@
-add_subdirectory(include)
-add_subdirectory(lib)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_BINARY_DIR}/include)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} APPEND PROPERTY INCLUDE_DIRECTORIES
+  ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_BINARY_DIR}/include
+)
+add_subdirectory(${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR}/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
 if(FLAGTREE_PLUGIN)
   set(PLUGIN_DIR "${Python3_SITELIB}/triton/_C")
@@ -33,4 +39,21 @@ if(TRITON_BUILD_PYTHON_MODULE)
     list(APPEND CMAKE_BUILD_RPATH "$ORIGIN")
     set(CMAKE_BUILD_RPATH "${CMAKE_BUILD_RPATH}" PARENT_SCOPE)
   endif()
+endif()
+
+target_sources(TritonTools PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/lib/Tools/SwizzleDumpUtils.cpp
+)
+
+if(BUILD_MCTLE)
+  add_dependencies(TritonAnalysis McTleTableGen)
+  target_link_libraries(TritonToTritonGPU PUBLIC McTleIR)
+  target_include_directories(TritonToTritonGPU PRIVATE
+    ${PROJECT_SOURCE_DIR}/third_party/metax/plugin
+    ${PROJECT_BINARY_DIR}/third_party/metax/plugin
+  )
+endif()
+
+if(TRITON_BUILD_DISTRIBUTED)
+  target_link_libraries(TritonAnalysis PUBLIC DistributedIR)
 endif()
