@@ -1,0 +1,49 @@
+name: U181 Runner Smoke
+
+on:
+  push:
+    branches:
+      - ci/u181-runner-smoke
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: u181-runner-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.repository == 'douyixuan/FlagTree'
+    runs-on: [self-hosted, u181, flagtree, container]
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the exact workflow commit
+        uses: actions/checkout@v4
+
+      - name: Verify runner and checkout provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$RUNNER_NAME" = "u181-flagtree-1"
+          test "$RUNNER_OS" = "Linux"
+          grep -q '^VERSION_ID="22.04"' /etc/os-release
+          python3 --version
+          git --version
+          df -h "$RUNNER_WORKSPACE"
+
+      - name: Verify GitHub egress through the runner proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --head --max-time 15 \
+            https://api.github.com/ >/dev/null
+
+      - name: Compile FlagTree Python sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q python/triton
