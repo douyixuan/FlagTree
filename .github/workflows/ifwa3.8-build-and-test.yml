@@ -23,7 +23,7 @@ name: Ifwa3.8-Build-And-Test
 on:
   workflow_dispatch:
   push:
-    branches: [triton_v3.8.x]
+    branches: [codex/ifwa-runner221-20261106]
   pull_request:
     branches: [triton_v3.8.x]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -38,9 +38,10 @@ concurrency:
 jobs:
   ifwa38x-build:
     if: >-
-      github.repository == 'flagos-ai/FlagTree' &&
+      github.repository == 'douyixuan/FlagTree' &&
+      github.ref == 'refs/heads/codex/ifwa-runner221-20261106' &&
       (github.event_name != 'pull_request' || !github.event.pull_request.draft)
-    runs-on: [self-hosted, Linux, X64, flagtree-ifwa-build]
+    runs-on: [self-hosted, Linux, X64, ifwa-preview-221]
     timeout-minutes: 120
     container:
       image: harbor.baai.ac.cn/flagtree/flagtree-ifwa-py313-torch2.13.0-cpu-ubuntu22.04@sha256:2cd1e179eaed533fa494c1fa1daf380a451719a416619ba37d63f6f1ccf42f01
@@ -58,7 +59,7 @@ jobs:
       OUTPUT_DIR: /tmp/ifwa-runtime
       CCACHE_DIR: /ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
-      TRITON_CACHE_DIR: /triton-cache
+      TRITON_CACHE_DIR: /run/ifwa/triton-cache
       MAX_JOBS: '4'
       FLAGTREE_BACKEND: intellifusion
       TRITON_BUILD_PROTON: 'OFF'
@@ -68,7 +69,7 @@ jobs:
 
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: c763f1d7f890ae5dfbf0c1eed40728bb323fff39
           persist-credentials: false
 
       - name: Build FlagTree
