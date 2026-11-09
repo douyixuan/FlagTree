@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: c763f1d7f890ae5dfbf0c1eed40728bb323fff39
+          ref: d058c7a45c4db3563cd30f0d09bf6207075c32f9
           persist-credentials: false
 
       - name: Build FlagTree
